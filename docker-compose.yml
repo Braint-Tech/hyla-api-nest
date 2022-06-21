@@ -1,0 +1,93 @@
+version: "3.9"
+
+services:
+  
+  mysqldb:
+    image: mysql:5.7
+    env_file: .env
+    ports:
+      - 3310:3306
+    networks:
+      - my-app-network
+    volumes:
+      - my-app-data:/var/lib/mysql
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file: .env
+    networks:
+      - my-app-network
+    volumes:
+      - ./:/home/node/app
+      - /home/node/app/node_modules
+    ports:
+      - "3000:3000"
+    depends_on:
+      - mysqldb
+    command: >
+        sh -c "
+        npm install &&
+        npm run start:dev"
+
+  test:
+    profiles:
+      - test
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file: .env
+    networks:
+      - my-app-network
+    volumes:
+      - ./:/home/node/app
+      - /home/node/app/node_modules
+    depends_on:
+      - mysqldb
+    command: >
+        sh -c "
+        npm install &&
+        npm run test"
+
+  console:
+    profiles:
+      - console
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file: .env
+    networks:
+      - my-app-network
+    volumes:
+      - ./:/home/node/app
+      - /home/node/app/node_modules
+    command: >
+        sh -c "bash"
+
+  app-production-mode:
+    profiles:
+      - production-mode
+    build:
+      context: .
+      target: production
+    env_file: .env
+    networks:
+      - my-app-network
+    depends_on:
+      - mysqldb
+    ports:
+      - '3000:3000'
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8181:8080
+
+networks:
+  my-app-network:
+    driver: bridge
+
+volumes:
+  my-app-data:
