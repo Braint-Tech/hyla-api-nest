@@ -1,8 +1,8 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserDto } from './user.dto';
-import { User } from './user.entity';
 import { UserRepository } from './user.repository';
+import * as jwt from 'jsonwebtoken';
 
 @Injectable()
 export class UserService {
@@ -11,15 +11,43 @@ export class UserService {
     private userRepository: UserRepository,
   ) {}
 
-  async createUser(userDto: UserDto): Promise<User> {
-    try {
-      return await this.userRepository.createUser(userDto);
-    } catch (error) {
-      throw new HttpException(error, HttpStatus.BAD_REQUEST);
+  async authUser(userDto: UserDto): Promise<object> {
+    const user = await this.userRepository.findByCellphone(userDto.cellphone);
+
+    if (user != undefined) {
+      if (user.disabled) return null;
+
+      const token = this.generateToken(user.id, user.role, user.disabled);
+
+      return {
+        token,
+        auth: user.name == null ? false : true,
+      };
+    } else {
+      const response = await this.userRepository.createUser(userDto);
+
+      if (!response) return response;
+
+      const token = this.generateToken(response.id);
+
+      return {
+        token,
+        auth: false,
+      };
     }
   }
 
-  async findAll(): Promise<User[]> {
-    return await this.userRepository.findAll();
+  private generateToken(idUser: number, role = '2', disabled = false): string {
+    return jwt.sign(
+      {
+        idUser,
+        role,
+        disabled,
+      },
+      process.env.TOKEN_KEY,
+      {
+        expiresIn: '9999 years',
+      },
+    );
   }
 }

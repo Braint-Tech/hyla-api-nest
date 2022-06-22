@@ -16,7 +16,7 @@ export class User {
   @Column({ nullable: true })
   name: string;
 
-  @Column()
+  @Column({ unique: true })
   cellphone: string;
 
   @Column({ nullable: true })
@@ -31,7 +31,7 @@ export class User {
   @Column({ default: '2' })
   role: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, unique: true })
   email: string;
 
   @Column({ default: false })
