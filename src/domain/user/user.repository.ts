@@ -1,5 +1,6 @@
 import { EntityRepository, Like } from 'typeorm';
 import { User } from './user.entity';
+import { Address } from './address/address.entity';
 import { UserDto } from './user.dto';
 import * as bcrypt from 'bcrypt';
 import { Repository } from 'typeorm/repository/Repository';
@@ -68,5 +69,29 @@ export class UserRepository extends Repository<User> {
     ]);
 
     return [list, { total: count }];
+  }
+
+  async findUserProfile(idUser: number): Promise<object> {
+    const result = await this.createQueryBuilder()
+      .leftJoin(Address, 'address', 'id = address.userId')
+      .select([
+        'name',
+        'email',
+        'cellphone',
+        'phone',
+        'contactAuthorization',
+        'birthDate',
+        'address.street as street',
+        'address.number as number',
+        'address.complement as complement',
+        'address.zipcode as zipcode',
+        'address.neighbourhood as neighbourhood',
+        'address.city as city',
+        'address.state as state',
+      ])
+      .where({ id: idUser })
+      .getRawOne();
+
+    return result;
   }
 }

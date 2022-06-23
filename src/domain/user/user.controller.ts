@@ -77,4 +77,16 @@ export class UserController {
       else throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('/profile/:idUser')
+  async findUserProfile(@Param('idUser') idUser: number): Promise<object> {
+    try {
+      const response = await this.userService.findUserProfile(idUser);
+
+      return response;
+    } catch (error) {
+      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
 }

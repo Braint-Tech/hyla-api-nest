@@ -72,4 +72,8 @@ export class UserService {
   async listUser(offset: number, limit: number, name: string): Promise<any> {
     return await this.userRepository.listUser(offset, limit, name);
   }
+
+  async findUserProfile(idUser: number): Promise<any> {
+    return await this.userRepository.findUserProfile(idUser);
+  }
 }
