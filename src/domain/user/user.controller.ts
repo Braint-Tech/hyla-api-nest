@@ -6,7 +6,9 @@ import {
   HttpStatus,
   Put,
   Param,
+  UseGuards,
 } from '@nestjs/common';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { UserDto } from './user.dto';
 import { UserService } from './user.service';
 
@@ -35,6 +37,7 @@ export class UserController {
     }
   }
 
+  @UseGuards(JwtAuthGuard)
   @Put('/update/:idUser')
   async updateUser(
     @Param('idUser') idUser: number,
@@ -42,7 +45,6 @@ export class UserController {
   ): Promise<object> {
     try {
       const response = await this.userService.updateUser(userDto, idUser);
-
       if (response.success)
         return {
           message: 'User successfully updated!',
