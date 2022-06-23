@@ -7,6 +7,9 @@ import {
   Put,
   Param,
   UseGuards,
+  Get,
+  Request,
+  Query,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { UserDto } from './user.dto';
@@ -52,6 +55,26 @@ export class UserController {
       else throw response;
     } catch (error) {
       throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('/list/:offset/:limit')
+  async listUser(
+    @Param('offset') offset: number,
+    @Param('limit') limit: number,
+    @Request() req: any,
+    @Query('name') name: string,
+  ): Promise<object> {
+    try {
+      if (req.user.role != 1) throw { forbidden: true };
+
+      const response = await this.userService.listUser(offset, limit, name);
+      return response;
+    } catch (error) {
+      if (error.forbidden)
+        throw new HttpException('Unauthorized user!', HttpStatus.FORBIDDEN);
+      else throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 }

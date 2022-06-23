@@ -1,4 +1,4 @@
-import { EntityRepository } from 'typeorm';
+import { EntityRepository, Like } from 'typeorm';
 import { User } from './user.entity';
 import { UserDto } from './user.dto';
 import * as bcrypt from 'bcrypt';
@@ -48,5 +48,25 @@ export class UserRepository extends Repository<User> {
       .execute();
 
     return result.raw[0];
+  }
+
+  async listUser(
+    offset: number,
+    limit: number,
+    name: string,
+  ): Promise<object[]> {
+    const [list, count] = await Promise.all([
+      this.find({
+        select: ['id', 'name', 'email', 'cellphone', 'disabled'],
+        skip: offset,
+        take: limit,
+        where: name != undefined ? { name: Like(`%${name}%`) } : {},
+      }),
+      this.count({
+        where: name != undefined ? { name: Like(`%${name}%`) } : {},
+      }),
+    ]);
+
+    return [list, { total: count }];
   }
 }

@@ -68,4 +68,8 @@ export class UserService {
       return error;
     }
   }
+
+  async listUser(offset: number, limit: number, name: string): Promise<any> {
+    return await this.userRepository.listUser(offset, limit, name);
+  }
 }
