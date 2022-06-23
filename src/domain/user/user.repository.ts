@@ -32,4 +32,21 @@ export class UserRepository extends Repository<User> {
       where: { cellphone: cellphone },
     });
   }
+
+  async updateUser(userDto: UserDto, idUser: number): Promise<User> {
+    const result = await this.createQueryBuilder()
+      .update({
+        name: userDto.name,
+        email: userDto.email,
+        phone: userDto.phone,
+        birthDate: userDto.birthDate,
+        contactAuthorization: userDto.contactAuthorization,
+      })
+      .where({
+        id: idUser,
+      })
+      .execute();
+
+    return result.raw[0];
+  }
 }

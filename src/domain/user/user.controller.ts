@@ -4,6 +4,8 @@ import {
   Body,
   HttpException,
   HttpStatus,
+  Put,
+  Param,
 } from '@nestjs/common';
 import { UserDto } from './user.dto';
 import { UserService } from './user.service';
@@ -12,7 +14,7 @@ import { UserService } from './user.service';
 export class UserController {
   constructor(private userService: UserService) {}
 
-  @Post()
+  @Post('/auth')
   async createUser(@Body() userDto: UserDto): Promise<object> {
     try {
       const response = await this.userService.authUser(userDto);
@@ -30,6 +32,24 @@ export class UserController {
           HttpStatus.PRECONDITION_FAILED,
         );
       else throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  @Put('/update/:idUser')
+  async updateUser(
+    @Param('idUser') idUser: number,
+    @Body() userDto: UserDto,
+  ): Promise<object> {
+    try {
+      const response = await this.userService.updateUser(userDto, idUser);
+
+      if (response.success)
+        return {
+          message: 'User successfully updated!',
+        };
+      else throw response;
+    } catch (error) {
+      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 }

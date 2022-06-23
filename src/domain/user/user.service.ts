@@ -3,12 +3,14 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { UserDto } from './user.dto';
 import { UserRepository } from './user.repository';
 import * as jwt from 'jsonwebtoken';
+import { AddressService } from './address/address.service';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(UserRepository)
     private userRepository: UserRepository,
+    private addressService: AddressService,
   ) {}
 
   async authUser(userDto: UserDto): Promise<object> {
@@ -49,5 +51,21 @@ export class UserService {
         expiresIn: '9999 years',
       },
     );
+  }
+
+  async updateUser(userDto: UserDto, idUser: number): Promise<any> {
+    try {
+      await this.userRepository.updateUser(userDto, idUser);
+
+      if (
+        (await this.addressService.updateAddress(userDto.address, idUser)) !=
+        undefined
+      )
+        await this.addressService.insertAddress(userDto.address, idUser);
+
+      return { success: true };
+    } catch (error) {
+      return error;
+    }
   }
 }

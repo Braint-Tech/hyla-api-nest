@@ -1,42 +1,39 @@
 import {
   Entity,
   Column,
-  PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
+  OneToOne,
+  JoinColumn,
 } from 'typeorm';
+import { User } from './../user.entity';
 
 @Entity()
-export class User {
-  @PrimaryGeneratedColumn()
-  id: number;
-
+export class Address {
   @Column({ nullable: true })
-  name: string;
+  street: string;
 
   @Column({ unique: true })
-  cellphone: string;
+  number: string;
 
   @Column({ nullable: true })
-  phone: string;
+  complement: string;
 
   @Column()
-  password: string;
+  zipcode: string;
 
   @Column({ nullable: true })
-  birthDate: string;
+  neighbourhood: string;
 
   @Column({ default: '2' })
-  role: string;
+  city: string;
 
   @Column({ nullable: true, unique: true })
-  email: string;
+  state: string;
 
-  @Column({ default: false })
-  contactAuthorization: boolean;
-
-  @Column({ default: false })
-  disabled: boolean;
+  @OneToOne(() => User, (user) => user.id, { primary: true })
+  @JoinColumn()
+  user: User;
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
