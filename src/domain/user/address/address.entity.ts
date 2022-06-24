@@ -10,7 +10,7 @@ import { User } from './../user.entity';
 
 @Entity()
 export class Address {
-  @Column({ nullable: true })
+  @Column()
   street: string;
 
   @Column({ unique: true })
@@ -22,13 +22,13 @@ export class Address {
   @Column()
   zipcode: string;
 
-  @Column({ nullable: true })
+  @Column()
   neighbourhood: string;
 
   @Column({ default: '2' })
   city: string;
 
-  @Column({ nullable: true, unique: true })
+  @Column()
   state: string;
 
   @OneToOne(() => User, (user) => user.id, { primary: true })

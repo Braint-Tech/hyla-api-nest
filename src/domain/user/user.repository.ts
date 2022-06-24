@@ -4,6 +4,7 @@ import { Address } from './address/address.entity';
 import { UserDto } from './user.dto';
 import * as bcrypt from 'bcrypt';
 import { Repository } from 'typeorm/repository/Repository';
+import { Product } from '../product/product.entity';
 
 @EntityRepository(User)
 export class UserRepository extends Repository<User> {
@@ -57,41 +58,92 @@ export class UserRepository extends Repository<User> {
     name: string,
   ): Promise<object[]> {
     const [list, count] = await Promise.all([
-      this.find({
-        select: ['id', 'name', 'email', 'cellphone', 'disabled'],
-        skip: offset,
-        take: limit,
-        where: name != undefined ? { name: Like(`%${name}%`) } : {},
-      }),
+      this.createQueryBuilder()
+        .distinct()
+        .select([
+          'user.id',
+          'user.name',
+          'user.email',
+          'user.cellphone',
+          'user.disabled',
+        ])
+        .addSelect(
+          (subQuery) =>
+            subQuery
+              .select('COUNT(product.id)')
+              .from(Product, 'product')
+              .where('product.userId = user.id'),
+          'totalProduct',
+        )
+        .from(User, 'user')
+        .where(name != undefined ? { name: Like(`%${name}%`) } : {})
+        .offset(offset)
+        .limit(limit)
+        .getRawMany(),
       this.count({
         where: name != undefined ? { name: Like(`%${name}%`) } : {},
       }),
     ]);
 
-    return [list, { total: count }];
+    return [list, { totalUser: count }];
   }
 
   async findUserProfile(idUser: number): Promise<object> {
     const result = await this.createQueryBuilder()
-      .leftJoin(Address, 'address', 'id = address.userId')
+      .distinct()
+      .leftJoin(Address, 'address', 'user.id = address.userId')
+      .leftJoin(Product, 'product', 'user.id = product.userId')
       .select([
-        'name',
-        'email',
-        'cellphone',
-        'phone',
-        'contactAuthorization',
-        'birthDate',
-        'address.street as street',
-        'address.number as number',
-        'address.complement as complement',
-        'address.zipcode as zipcode',
-        'address.neighbourhood as neighbourhood',
-        'address.city as city',
-        'address.state as state',
+        'user.name',
+        'user.email',
+        'user.cellphone',
+        'user.phone',
+        'user.contactAuthorization',
+        'user.birthDate',
+        'address.street',
+        'address.number',
+        'address.complement',
+        'address.zipcode',
+        'address.neighbourhood',
+        'address.city',
+        'address.state',
+        'product.id',
+        'product.code',
+        'product.purchaseDate',
       ])
+      .from(User, 'user')
       .where({ id: idUser })
-      .getRawOne();
-
-    return result;
+      .getRawMany();
+    console.log(result);
+    return formatUserProfile(result);
   }
 }
+
+const formatUserProfile = (data: any[]) => {
+  if (data.length === 0) return {};
+
+  return {
+    name: data[0].user_name,
+    email: data[0].user_email,
+    cellphone: data[0].user_cellphone,
+    phone: data[0].user_phone,
+    contactAuthorization: data[0].user_contactAuthorization,
+    birthDate: data[0].user_birthDate,
+    address: {
+      street: data[0].address_street,
+      number: data[0].address_number,
+      complement: data[0].address_complement,
+      zipcode: data[0].address_zipcode,
+      neighbourhood: data[0].address_neighbourhood,
+      city: data[0].address_city,
+      state: data[0].address_state,
+    },
+    products: data.map((item) => {
+      return {
+        id: item.product_id,
+        code: item.product_code,
+        purchaseDate: item.product_purchaseDate,
+      };
+    }, []),
+  };
+};
