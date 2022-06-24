@@ -22,7 +22,10 @@ export class Product {
   @Column({ nullable: true })
   representativeName: string;
 
-  @ManyToOne(() => User, (user) => user.id, { nullable: true })
+  @ManyToOne(() => User, (user) => user.id, {
+    nullable: true,
+    onDelete: 'CASCADE',
+  })
   user: User;
 
   @CreateDateColumn({ name: 'created_at' })

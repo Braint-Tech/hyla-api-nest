@@ -10,6 +10,7 @@ import {
   Get,
   Request,
   Query,
+  Delete,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { UserDto } from './user.dto';
@@ -85,6 +86,22 @@ export class UserController {
       const response = await this.userService.findUserProfile(idUser);
 
       return response;
+    } catch (error) {
+      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Delete('/delete/:idUser')
+  async deleteUser(@Param('idUser') idUser: number): Promise<object> {
+    try {
+      const response = await this.userService.deleteUser(idUser);
+
+      if (response.success)
+        return {
+          message: 'User successfully removed!',
+        };
+      else throw response;
     } catch (error) {
       throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }

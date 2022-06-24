@@ -117,6 +117,17 @@ export class UserRepository extends Repository<User> {
     console.log(result);
     return formatUserProfile(result);
   }
+
+  async deleteUser(idUser: number): Promise<User> {
+    const result = await this.createQueryBuilder()
+      .delete()
+      .where({
+        id: idUser,
+      })
+      .execute();
+
+    return result.raw[0];
+  }
 }
 
 const formatUserProfile = (data: any[]) => {

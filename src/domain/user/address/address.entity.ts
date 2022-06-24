@@ -31,7 +31,10 @@ export class Address {
   @Column()
   state: string;
 
-  @OneToOne(() => User, (user) => user.id, { primary: true })
+  @OneToOne(() => User, (user) => user.id, {
+    primary: true,
+    onDelete: 'CASCADE',
+  })
   @JoinColumn()
   user: User;
 

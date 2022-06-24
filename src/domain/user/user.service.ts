@@ -76,4 +76,14 @@ export class UserService {
   async findUserProfile(idUser: number): Promise<any> {
     return await this.userRepository.findUserProfile(idUser);
   }
+
+  async deleteUser(idUser: number): Promise<any> {
+    try {
+      await this.userRepository.deleteUser(idUser);
+
+      return { success: true };
+    } catch (error) {
+      return error;
+    }
+  }
 }
