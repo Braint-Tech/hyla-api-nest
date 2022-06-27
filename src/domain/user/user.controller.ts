@@ -11,6 +11,7 @@ import {
   Request,
   Query,
   Delete,
+  Patch,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { UserDto } from './user.dto';
@@ -37,6 +38,24 @@ export class UserController {
           'User with access disabled!',
           HttpStatus.PRECONDITION_FAILED,
         );
+      else throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  @Post('/admin/auth')
+  async authAdmin(@Body() userDto: UserDto): Promise<object> {
+    try {
+      const response = await this.userService.authAdmin(userDto);
+
+      if (response === null) throw { forbidden: true };
+
+      return {
+        response,
+        message: 'User successfully authenticated!',
+      };
+    } catch (error) {
+      if (error.forbidden)
+        throw new HttpException('Incorrect password!', HttpStatus.FORBIDDEN);
       else throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
@@ -100,6 +119,28 @@ export class UserController {
       if (response.success)
         return {
           message: 'User successfully removed!',
+        };
+      else throw response;
+    } catch (error) {
+      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch('/update/cellphone/:idUser')
+  async updateUserCellphone(
+    @Param('idUser') idUser: number,
+    @Body() userDto: UserDto,
+  ): Promise<object> {
+    try {
+      const response = await this.userService.updateUserCellphone(
+        userDto,
+        idUser,
+      );
+
+      if (response === undefined)
+        return {
+          message: 'User cellphone successfully updated!',
         };
       else throw response;
     } catch (error) {

@@ -35,6 +35,13 @@ export class UserRepository extends Repository<User> {
     });
   }
 
+  async findByEmail(email: string): Promise<User> {
+    return await this.findOne({
+      select: ['id', 'role', 'disabled', 'password'],
+      where: { email: email },
+    });
+  }
+
   async updateUser(userDto: UserDto, idUser: number): Promise<User> {
     const result = await this.createQueryBuilder()
       .update({
@@ -114,13 +121,26 @@ export class UserRepository extends Repository<User> {
       .from(User, 'user')
       .where({ id: idUser })
       .getRawMany();
-    console.log(result);
+
     return formatUserProfile(result);
   }
 
   async deleteUser(idUser: number): Promise<User> {
     const result = await this.createQueryBuilder()
       .delete()
+      .where({
+        id: idUser,
+      })
+      .execute();
+
+    return result.raw;
+  }
+
+  async updateUserCellphone(userDto: UserDto, idUser: number): Promise<User> {
+    const result = await this.createQueryBuilder()
+      .update({
+        cellphone: userDto.cellphone,
+      })
       .where({
         id: idUser,
       })

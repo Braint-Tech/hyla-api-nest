@@ -4,6 +4,7 @@ import { UserDto } from './user.dto';
 import { UserRepository } from './user.repository';
 import * as jwt from 'jsonwebtoken';
 import { AddressService } from './address/address.service';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UserService {
@@ -37,6 +38,28 @@ export class UserService {
         auth: false,
       };
     }
+  }
+
+  async authAdmin(userDto: UserDto): Promise<object> {
+    const user = await this.userRepository.findByEmail(userDto.email);
+
+    if (user != undefined) {
+      if (user.disabled) return null;
+
+      const authenticated = await bcrypt.compare(
+        userDto.password,
+        user.password,
+      );
+
+      if (authenticated) {
+        const token = this.generateToken(user.id, user.role, user.disabled);
+        console.log(token);
+        return {
+          token,
+          auth: true,
+        };
+      } else return null;
+    } else throw { message: 'Email not found!' };
   }
 
   private generateToken(idUser: number, role = '2', disabled = false): string {
@@ -85,5 +108,9 @@ export class UserService {
     } catch (error) {
       return error;
     }
+  }
+
+  async updateUserCellphone(userDto: UserDto, idUser: number): Promise<any> {
+    return await this.userRepository.updateUserCellphone(userDto, idUser);
   }
 }
