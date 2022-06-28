@@ -9,11 +9,14 @@ import {
   UploadedFile,
   Get,
   Param,
+  Put,
+  Body,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { ProductService } from './product.service';
 import { Express } from 'express';
+import { ProductDto } from './product.dto';
 
 @Controller('product')
 export class ProductController {
@@ -51,6 +54,27 @@ export class ProductController {
       const response = await this.productService.productVerification(code);
 
       return response;
+    } catch (error) {
+      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Put('/update/:code')
+  async updateUser(
+    @Param('code') code: string,
+    @Body() productDto: ProductDto,
+  ): Promise<object> {
+    try {
+      const response = await this.productService.updateProduct(
+        productDto,
+        code,
+      );
+      if (response.success)
+        return {
+          message: 'User successfully updated!',
+        };
+      else throw response;
     } catch (error) {
       throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }

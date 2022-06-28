@@ -49,4 +49,22 @@ export class ProductRepository extends Repository<Product> {
       .where({ code: code })
       .getRawMany();
   }
+
+  async updateProduct(productDto: ProductDto, code: string): Promise<Product> {
+    const user = new User();
+    user.id = productDto.userId;
+
+    const result = await this.createQueryBuilder()
+      .update({
+        purchaseDate: productDto.purchaseDate,
+        representativeName: productDto.representativeName,
+        user: user,
+      })
+      .where({
+        code: code,
+      })
+      .execute();
+
+    return result.raw[0];
+  }
 }

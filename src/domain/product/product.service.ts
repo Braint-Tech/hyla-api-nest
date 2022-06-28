@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ProductRepository } from './product.repository';
 import * as csvToJson from 'csvtojson';
+import { ProductDto } from './product.dto';
 
 @Injectable()
 export class ProductService {
@@ -47,5 +48,15 @@ export class ProductService {
           message: 'Product found successfully and already has a user!',
         };
     } else return { message: 'Product not found in the database!' };
+  }
+
+  async updateProduct(productDto: ProductDto, code: string): Promise<any> {
+    try {
+      await this.productRepository.updateProduct(productDto, code);
+
+      return { success: true };
+    } catch (error) {
+      return error;
+    }
   }
 }
