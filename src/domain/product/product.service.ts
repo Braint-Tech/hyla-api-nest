@@ -59,4 +59,8 @@ export class ProductService {
       return error;
     }
   }
+
+  async listProduct(offset: number, limit: number, code: string): Promise<any> {
+    return await this.productRepository.listProduct(offset, limit, code);
+  }
 }

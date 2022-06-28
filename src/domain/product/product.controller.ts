@@ -11,6 +11,7 @@ import {
   Param,
   Put,
   Body,
+  Query,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -77,6 +78,30 @@ export class ProductController {
       else throw response;
     } catch (error) {
       throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('/list/:offset/:limit')
+  async listUser(
+    @Param('offset') offset: number,
+    @Param('limit') limit: number,
+    @Request() req: any,
+    @Query('code') code: string,
+  ): Promise<object> {
+    try {
+      if (req.user.role != 1) throw { forbidden: true };
+
+      const response = await this.productService.listProduct(
+        offset,
+        limit,
+        code,
+      );
+      return response;
+    } catch (error) {
+      if (error.forbidden)
+        throw new HttpException('Unauthorized user!', HttpStatus.FORBIDDEN);
+      else throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 }

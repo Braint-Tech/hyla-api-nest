@@ -6,38 +6,31 @@ import {
   UpdateDateColumn,
   ManyToOne,
   JoinColumn,
-  OneToMany,
 } from 'typeorm';
-import { Review } from '../review/review.entity';
+import { Product } from '../product/product.entity';
 import { User } from './../user/user.entity';
 
 @Entity()
-export class Product {
+export class Review {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ unique: true })
-  code: string;
+  @Column()
+  date: string;
 
-  @Column({ nullable: true })
-  purchaseDate: string;
+  @Column()
+  status: string;
 
-  @Column({ nullable: true })
-  representativeName: string;
-
-  @ManyToOne(() => User, (user) => user.id, {
+  @ManyToOne(() => Product, (product) => product.id, {
     nullable: true,
     onDelete: 'CASCADE',
   })
-  @JoinColumn({ name: 'userId' })
-  user: User;
+  @JoinColumn({ name: 'productId' })
+  product: User;
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
-
-  @OneToMany(() => Review, (review) => review.product)
-  reviews: Review[];
 }

@@ -1,5 +1,6 @@
 import { EntityRepository } from 'typeorm';
 import { Repository } from 'typeorm/repository/Repository';
+import { Review } from '../review/review.entity';
 import { User } from '../user/user.entity';
 import { ProductDto } from './product.dto';
 import { Product } from './product.entity';
@@ -66,5 +67,57 @@ export class ProductRepository extends Repository<Product> {
       .execute();
 
     return result.raw[0];
+  }
+
+  async listProduct(
+    offset: number,
+    limit: number,
+    code: string,
+  ): Promise<object[]> {
+    const [list, count] = await Promise.all([
+      this.createQueryBuilder()
+        .distinct()
+        .select(['product.id', 'product.code', 'user.id'])
+        .addSelect(
+          (subQuery) =>
+            subQuery
+              .select('review.status')
+              .from(Review, 'review')
+              .where(
+                `product.userId = user.id AND UNIX_TIMESTAMP(STR_TO_DATE(review.date, '%d/%m/%Y')) > ${
+                  Date.now() / 1000
+                }`,
+              )
+              .limit(1)
+              .orderBy('review.id'),
+          'status',
+        )
+        .addSelect(
+          (subQuery) =>
+            subQuery
+              .select('review.date')
+              .from(Review, 'review')
+              .where(
+                `product.userId = user.id AND UNIX_TIMESTAMP(STR_TO_DATE(review.date, '%d/%m/%Y')) > ${
+                  Date.now() / 1000
+                }`,
+              )
+              .limit(1)
+              .orderBy('review.id'),
+          'dateNextReview',
+        )
+        .from(Product, 'product')
+        .leftJoin(User, 'user', 'user.id = product.userId')
+        .where(code != undefined ? { code: code } : {})
+        .offset(offset)
+        .limit(limit)
+        .orderBy('product.id', 'DESC')
+        .getRawMany(),
+      this.count({
+        where: code != undefined ? { code: code } : {},
+      }),
+    ]);
+
+    return [list, { totalProduct: count }];
   }
 }
