@@ -5,6 +5,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   ManyToOne,
+  JoinColumn,
 } from 'typeorm';
 import { User } from './../user/user.entity';
 
@@ -26,6 +27,7 @@ export class Product {
     nullable: true,
     onDelete: 'CASCADE',
   })
+  @JoinColumn({ name: 'userId' })
   user: User;
 
   @CreateDateColumn({ name: 'created_at' })

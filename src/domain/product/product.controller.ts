@@ -7,6 +7,8 @@ import {
   UseGuards,
   UseInterceptors,
   UploadedFile,
+  Get,
+  Param,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -39,6 +41,18 @@ export class ProductController {
       if (error.forbidden)
         throw new HttpException('Unauthorized user!', HttpStatus.FORBIDDEN);
       else throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('/verification/:code')
+  async productVerification(@Param('code') code: string): Promise<object> {
+    try {
+      const response = await this.productService.productVerification(code);
+
+      return response;
+    } catch (error) {
+      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 }

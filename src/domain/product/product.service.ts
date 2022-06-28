@@ -35,4 +35,17 @@ export class ProductService {
         index,
     );
   }
+
+  async productVerification(code: string): Promise<object> {
+    const product = await this.productRepository.findProductByCode(code);
+
+    if (product.length > 0) {
+      if (product[0].userId == null)
+        return { message: 'Product found successfully!' };
+      else
+        return {
+          message: 'Product found successfully and already has a user!',
+        };
+    } else return { message: 'Product not found in the database!' };
+  }
 }

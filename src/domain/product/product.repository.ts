@@ -1,5 +1,7 @@
 import { EntityRepository } from 'typeorm';
 import { Repository } from 'typeorm/repository/Repository';
+import { User } from '../user/user.entity';
+import { ProductDto } from './product.dto';
 import { Product } from './product.entity';
 
 @EntityRepository(Product)
@@ -36,5 +38,15 @@ export class ProductRepository extends Repository<Product> {
     }
 
     return spreadsheetData.filter((product: any) => product);
+  }
+
+  async findProductByCode(code: string): Promise<ProductDto[]> {
+    return await this.createQueryBuilder()
+      .distinct()
+      .leftJoin(User, 'user', 'user.id = product.userId')
+      .select(['product.id id', 'user.id userId'])
+      .from(Product, 'product')
+      .where({ code: code })
+      .getRawMany();
   }
 }
