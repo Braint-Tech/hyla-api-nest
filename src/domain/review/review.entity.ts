@@ -8,7 +8,6 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { Product } from '../product/product.entity';
-import { User } from './../user/user.entity';
 
 @Entity()
 export class Review {
@@ -26,7 +25,7 @@ export class Review {
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'productId' })
-  product: User;
+  product: Product;
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;

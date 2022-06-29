@@ -63,4 +63,8 @@ export class ProductService {
   async listProduct(offset: number, limit: number, code: string): Promise<any> {
     return await this.productRepository.listProduct(offset, limit, code);
   }
+
+  async findOneByCode(code: string): Promise<ProductDto> {
+    return this.productRepository.findOne({ where: { code: code } });
+  }
 }
