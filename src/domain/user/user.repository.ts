@@ -1,10 +1,11 @@
-import { EntityRepository, Like } from 'typeorm';
+import { EntityRepository, Like, Not } from 'typeorm';
 import { User } from './user.entity';
 import { Address } from './address/address.entity';
 import { UserDto } from './user.dto';
 import * as bcrypt from 'bcrypt';
 import { Repository } from 'typeorm/repository/Repository';
 import { Product } from '../product/product.entity';
+import * as XLSX from 'xlsx';
 
 @EntityRepository(User)
 export class UserRepository extends Repository<User> {
@@ -148,6 +149,54 @@ export class UserRepository extends Repository<User> {
 
     return result.raw[0];
   }
+
+  async exportUser(): Promise<object> {
+    const result = await this.createQueryBuilder()
+      .distinct()
+      .leftJoin(Address, 'address', 'user.id = address.userId')
+      .leftJoin(Product, 'product', 'user.id = product.userId')
+      .select([
+        'user.name',
+        'user.email',
+        'user.cellphone',
+        'user.phone',
+        'user.contactAuthorization',
+        'address.street',
+        'address.number',
+        'address.complement',
+        'address.zipcode',
+        'address.neighbourhood',
+        'address.city',
+        'address.state',
+        'product.representativeName',
+        'product.code',
+        'product.purchaseDate',
+      ])
+      .addSelect(
+        (subQuery) =>
+          subQuery
+            .select('COUNT(product.id)')
+            .from(Product, 'product')
+            .where('product.userId = user.id'),
+        'totalProduct',
+      )
+      .from(User, 'user')
+      .where({ role: Not('1') })
+      .orderBy('user.name')
+      .getRawMany();
+
+    const userDataFormatted = formatExportUser(result);
+    return { base64: this.jsonToXlsx(userDataFormatted) };
+  }
+
+  private jsonToXlsx(data: any): any {
+    const workbook = XLSX.utils.book_new();
+
+    const worksheet = XLSX.utils.json_to_sheet(data || []);
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Usuários');
+
+    return XLSX.write(workbook, { type: 'base64' });
+  }
 }
 
 const formatUserProfile = (data: any[]) => {
@@ -178,3 +227,74 @@ const formatUserProfile = (data: any[]) => {
     }, []),
   };
 };
+
+const formatExportUser = (data: any[]) => {
+  return data
+    .map((item: any) => {
+      return {
+        Nome: item.user_name,
+        Email: item.user_email,
+        'Telefone Cadastrado': item.user_cellphone,
+        'Telefone para Contato': item.user_phone,
+        'Autorização de Contato': item.user_contactAuthorization
+          ? 'Sim'
+          : 'Não',
+        Endereço: item.address_street ? formatAddress(item) : null,
+        'Quantidade de Hylas': item.totalProduct,
+        'Número de série': arrayToString(
+          getProductItem(data, item.user_email, 'product_code'),
+        ),
+        'Data de compra': arrayToString(
+          getProductDate(data, item.user_email, 'product_purchaseDate'),
+        ),
+        'Nome do representante': arrayToString(
+          getProductItem(data, item.user_email, 'product_representativeName'),
+        ),
+      };
+    })
+    .filter((value: any, index: any, array: any) => {
+      return (
+        array.findIndex((index2: any) => index2['Email'] === value['Email']) ===
+        index
+      );
+    });
+};
+
+const formatZipcode = (zipcode: string) =>
+  `${zipcode.slice(0, 5)}-${zipcode.slice(5, 8)}`;
+
+const formatAddress = (item: any) => {
+  if (item.address_complement) {
+    return `Rua ${item.address_street}, ${item.address_number}, ${
+      item.address_complement
+    }, ${formatZipcode(item.address_zipcode)}, ${
+      item.address_neighbourhood
+    },  ${item.address_city} - ${item.address_state}`;
+  } else {
+    return `Rua ${item.address_street}, ${item.address_number}, ${formatZipcode(
+      item.address_zipcode,
+    )}, ${item.address_neighbourhood},  ${item.address_city} - ${
+      item.address_state
+    }`;
+  }
+};
+
+const getProductItem = (data: any, emailUser: string, item: any) => {
+  return data
+    .map((product: any) => {
+      if (product.user_email === emailUser) return product[item];
+      else return null;
+    }, [])
+    .filter((item: any) => item);
+};
+
+const getProductDate = (data: any, emailUser: string, item: any) => {
+  return data
+    .map((product: any) => {
+      if (product.user_email === emailUser) return product[item];
+      else return null;
+    }, [])
+    .filter((item: any) => item);
+};
+
+const arrayToString = (array: any) => `${array.join(', ')}`;

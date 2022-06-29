@@ -113,4 +113,8 @@ export class UserService {
   async updateUserCellphone(userDto: UserDto, idUser: number): Promise<any> {
     return await this.userRepository.updateUserCellphone(userDto, idUser);
   }
+
+  async exportUser(): Promise<any> {
+    return await this.userRepository.exportUser();
+  }
 }

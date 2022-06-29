@@ -147,4 +147,19 @@ export class UserController {
       throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('/admin/export')
+  async exportUser(@Request() req: any): Promise<object> {
+    try {
+      if (req.user.role != 1) throw { forbidden: true };
+
+      const response = await this.userService.exportUser();
+      return response;
+    } catch (error) {
+      if (error.forbidden)
+        throw new HttpException('Unauthorized user!', HttpStatus.FORBIDDEN);
+      else throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
 }
