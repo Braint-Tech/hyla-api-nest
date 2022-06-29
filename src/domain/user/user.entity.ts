@@ -6,6 +6,7 @@ import {
   UpdateDateColumn,
   OneToMany,
 } from 'typeorm';
+import { Content } from '../content/content.entity';
 import { Product } from '../product/product.entity';
 
 @Entity()
@@ -48,4 +49,7 @@ export class User {
 
   @OneToMany(() => Product, (product) => product.user)
   products: Product[];
+
+  @OneToMany(() => Content, (content) => content.user)
+  contents: Content[];
 }
