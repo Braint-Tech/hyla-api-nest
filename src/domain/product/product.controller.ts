@@ -104,4 +104,16 @@ export class ProductController {
       else throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('/find/:code')
+  async findProduct(@Param('code') code: string): Promise<object> {
+    try {
+      const response = await this.productService.findProduct(code);
+
+      return response;
+    } catch (error) {
+      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
 }

@@ -67,4 +67,8 @@ export class ProductService {
   async findOneByCode(code: string): Promise<ProductDto> {
     return this.productRepository.findOne({ where: { code: code } });
   }
+
+  async findProduct(code: string): Promise<any> {
+    return this.productRepository.findProduct(code);
+  }
 }

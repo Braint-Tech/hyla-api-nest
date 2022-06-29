@@ -120,4 +120,36 @@ export class ProductRepository extends Repository<Product> {
 
     return [list, { totalProduct: count }];
   }
+
+  async findProduct(code: string): Promise<any> {
+    const product = await this.createQueryBuilder()
+      .distinct()
+      .select([
+        'product.id',
+        'product.code',
+        'product.purchaseDate',
+        'product.representativeName',
+        'review.date',
+        'review.status',
+      ])
+      .from(Product, 'product')
+      .leftJoin(Review, 'review', 'product.id = review.productId')
+      .where({ code })
+      .getRawMany();
+
+    return formatFindProduct(product);
+  }
 }
+
+const formatFindProduct = (products: any) => {
+  return {
+    purchaseDate: products[0].purchaseDate,
+    representativeName: products[0].representativeName,
+    review: products.map((product) => {
+      return {
+        date: product.review_date,
+        status: product.review_status,
+      };
+    }),
+  };
+};
