@@ -6,8 +6,10 @@ import {
   Request,
   UseGuards,
   Body,
+  Put,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { ReviewDto } from './review.dto';
 import { ReviewService } from './review.service';
 
 @Controller('review')
@@ -38,6 +40,21 @@ export class ReviewController {
       if (error.forbidden)
         throw new HttpException('Unauthorized user!', HttpStatus.FORBIDDEN);
       else throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Put('/update')
+  async updateReview(@Body() reviewDto: ReviewDto[]): Promise<object> {
+    try {
+      const response = await this.reviewService.updateReview(reviewDto);
+      if (response)
+        return {
+          message: 'Review successfully updated!',
+        };
+      else throw response;
+    } catch (error) {
+      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 }

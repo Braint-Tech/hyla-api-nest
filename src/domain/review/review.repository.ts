@@ -1,6 +1,7 @@
 import { EntityRepository } from 'typeorm';
 import { Repository } from 'typeorm/repository/Repository';
 import { Product } from '../product/product.entity';
+import { ReviewDto } from './review.dto';
 import { Review } from './review.entity';
 
 @EntityRepository(Review)
@@ -43,5 +44,18 @@ export class ReviewRepository extends Repository<Review> {
     const currentYear = date.split('/')[2];
     const newYear = (parseInt(currentYear) + index + 1).toString();
     return date.replace(currentYear, newYear);
+  }
+
+  async updateReview(reviewDto: ReviewDto[]): Promise<object> {
+    const review = reviewDto.map((review) => {
+      const product = new Product();
+      product.id = review.productId;
+      return {
+        date: review.date,
+        product: product,
+        status: review.status,
+      };
+    });
+    return await this.save(review);
   }
 }
