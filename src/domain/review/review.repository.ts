@@ -1,4 +1,4 @@
-import { EntityRepository } from 'typeorm';
+import { createQueryBuilder, EntityRepository } from 'typeorm';
 import { Repository } from 'typeorm/repository/Repository';
 import { Product } from '../product/product.entity';
 import { ReviewDto } from './review.dto';
@@ -57,5 +57,26 @@ export class ReviewRepository extends Repository<Review> {
       };
     });
     return await this.save(review);
+  }
+
+  async getNextDateReview(code: string): Promise<object> {
+    return await createQueryBuilder()
+      .addSelect(
+        (subQuery) =>
+          subQuery
+            .select('review.date')
+            .from(Review, 'review')
+            .where(
+              `review.productId = product.id AND UNIX_TIMESTAMP(STR_TO_DATE(review.date, '%d/%m/%Y')) > ${
+                Date.now() / 1000
+              }`,
+            )
+            .limit(1)
+            .orderBy('review.id'),
+        'dateNextReview',
+      )
+      .from(Product, 'product')
+      .where({ code })
+      .getRawOne();
   }
 }

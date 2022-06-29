@@ -7,6 +7,8 @@ import {
   UseGuards,
   Body,
   Put,
+  Get,
+  Param,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { ReviewDto } from './review.dto';
@@ -53,6 +55,18 @@ export class ReviewController {
           message: 'Review successfully updated!',
         };
       else throw response;
+    } catch (error) {
+      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('/next/date/:code')
+  async getNextDateReview(@Param('code') code: string): Promise<object> {
+    try {
+      const response = await this.reviewService.getNextDateReview(code);
+
+      return response;
     } catch (error) {
       throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }

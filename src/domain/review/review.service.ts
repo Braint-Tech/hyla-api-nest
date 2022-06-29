@@ -24,4 +24,8 @@ export class ReviewService {
     await this.reviewRepository.deleteReviewByProduct(reviewDto[0].productId);
     return await this.reviewRepository.updateReview(reviewDto);
   }
+
+  async getNextDateReview(code: string): Promise<any> {
+    return await this.reviewRepository.getNextDateReview(code);
+  }
 }
