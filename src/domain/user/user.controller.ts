@@ -162,4 +162,19 @@ export class UserController {
       else throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch('/forgot/password')
+  async forgotPasswordUser(@Body('email') email: string): Promise<object> {
+    try {
+      await this.userService.forgotPasswordUser(email);
+      return {
+        message: 'Email successfully sent!',
+      };
+    } catch (error) {
+      if (error.message === 'User not found!')
+        throw new HttpException(error.message, HttpStatus.NOT_ACCEPTABLE);
+      else throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
 }

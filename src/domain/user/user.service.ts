@@ -5,6 +5,7 @@ import { UserRepository } from './user.repository';
 import * as jwt from 'jsonwebtoken';
 import { AddressService } from './address/address.service';
 import * as bcrypt from 'bcrypt';
+import { MailService } from './mail/mail.service';
 
 @Injectable()
 export class UserService {
@@ -12,6 +13,7 @@ export class UserService {
     @InjectRepository(UserRepository)
     private userRepository: UserRepository,
     private addressService: AddressService,
+    private mailService: MailService,
   ) {}
 
   async authUser(userDto: UserDto): Promise<object> {
@@ -62,7 +64,12 @@ export class UserService {
     } else throw { message: 'Email not found!' };
   }
 
-  private generateToken(idUser: number, role = '2', disabled = false): string {
+  private generateToken(
+    idUser: number,
+    role = '2',
+    disabled = false,
+    expires = '9999 years',
+  ): string {
     return jwt.sign(
       {
         idUser,
@@ -71,7 +78,7 @@ export class UserService {
       },
       process.env.TOKEN_KEY,
       {
-        expiresIn: '9999 years',
+        expiresIn: expires,
       },
     );
   }
@@ -116,5 +123,19 @@ export class UserService {
 
   async exportUser(): Promise<any> {
     return await this.userRepository.exportUser();
+  }
+
+  async forgotPasswordUser(email: string): Promise<any> {
+    const user = await this.userRepository.findByEmail(email);
+
+    if (user !== undefined) {
+      const token = this.generateToken(
+        user.id,
+        user.role,
+        user.disabled,
+        '300000',
+      );
+      return await this.mailService.sendPasswordReset(email, token);
+    } else throw { message: 'User not found!' };
   }
 }
