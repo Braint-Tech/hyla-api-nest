@@ -70,4 +70,15 @@ export class ContentRepository extends Repository<Content> {
 
     return result.raw[0];
   }
+
+  async deleteContent(idContent: number): Promise<Content> {
+    const result = await this.createQueryBuilder()
+      .delete()
+      .where({
+        id: idContent,
+      })
+      .execute();
+
+    return result.raw;
+  }
 }

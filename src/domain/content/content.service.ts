@@ -34,4 +34,8 @@ export class ContentService {
   async updateContent(contentDto: ContentDto, idContent: number): Promise<any> {
     return await this.contentRepository.updateContent(contentDto, idContent);
   }
+
+  async deleteContent(idContent: number): Promise<any> {
+    return await this.contentRepository.deleteContent(idContent);
+  }
 }

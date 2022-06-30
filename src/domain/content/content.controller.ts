@@ -10,6 +10,7 @@ import {
   Param,
   Query,
   Put,
+  Delete,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { ContentDto } from './content.dto';
@@ -106,6 +107,19 @@ export class ContentController {
 
       return {
         message: 'Content successfully updated!',
+      };
+    } catch (error) {
+      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Delete('/delete/:idContent')
+  async deleteContent(@Param('idContent') idContent: number): Promise<object> {
+    try {
+      await this.contentService.deleteContent(idContent);
+      return {
+        message: 'Content successfully removed!',
       };
     } catch (error) {
       throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
