@@ -69,7 +69,7 @@ export class ContentController {
 
   @UseGuards(JwtAuthGuard)
   @Get('/list/:offset/:limit')
-  async listUser(
+  async listContent(
     @Param('offset') offset: number,
     @Param('limit') limit: number,
     @Request() req: any,
@@ -132,6 +132,20 @@ export class ContentController {
     try {
       const response = await this.contentService.findProductContent();
 
+      return response;
+    } catch (error) {
+      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('/list/blog/:offset/:limit')
+  async listBlogContent(
+    @Param('offset') offset: number,
+    @Param('limit') limit: number,
+  ): Promise<object> {
+    try {
+      const response = await this.contentService.listBlogContent(offset, limit);
       return response;
     } catch (error) {
       throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);

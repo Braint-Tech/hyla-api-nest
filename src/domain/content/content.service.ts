@@ -42,4 +42,8 @@ export class ContentService {
   async findProductContent(): Promise<object> {
     return await this.contentRepository.findProductContent();
   }
+
+  async listBlogContent(offset: number, limit: number): Promise<any> {
+    return await this.contentRepository.listBlogContent(offset, limit);
+  }
 }
