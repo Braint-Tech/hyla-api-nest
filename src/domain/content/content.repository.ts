@@ -20,4 +20,35 @@ export class ContentRepository extends Repository<Content> {
       where: { id: idContent },
     });
   }
+
+  async listContent(
+    offset: number,
+    limit: number,
+    title: string,
+    type: string,
+  ): Promise<object[]> {
+    const filter = this.createFilterListContent(title, type);
+    const [list, count] = await Promise.all([
+      this.createQueryBuilder()
+        .distinct()
+        .select(['id', 'title', 'type', 'link', 'image', 'date'])
+        .where(filter)
+        .offset(offset)
+        .limit(limit)
+        .getRawMany(),
+      this.count({
+        where: filter,
+      }),
+    ]);
+
+    return [list, { totalContent: count }];
+  }
+
+  private createFilterListContent(title: string, type: string): object {
+    if (title !== undefined && type !== undefined)
+      return { title: title, type: type };
+    else if (title !== undefined && type === undefined) return { title: title };
+    else if (title === undefined && type !== undefined) return { type: type };
+    else return {};
+  }
 }

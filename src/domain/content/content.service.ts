@@ -21,4 +21,13 @@ export class ContentService {
   async findContent(idContent: number): Promise<object> {
     return await this.contentRepository.findContent(idContent);
   }
+
+  async listContent(
+    offset: number,
+    limit: number,
+    title: string,
+    type: string,
+  ): Promise<any> {
+    return await this.contentRepository.listContent(offset, limit, title, type);
+  }
 }

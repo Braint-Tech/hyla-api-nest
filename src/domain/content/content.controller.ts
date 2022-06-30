@@ -8,6 +8,7 @@ import {
   Body,
   Get,
   Param,
+  Query,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { ContentDto } from './content.dto';
@@ -56,6 +57,32 @@ export class ContentController {
 
       const response = await this.contentService.findContent(idContent);
 
+      return response;
+    } catch (error) {
+      if (error.forbidden)
+        throw new HttpException('Unauthorized user!', HttpStatus.FORBIDDEN);
+      else throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('/list/:offset/:limit')
+  async listUser(
+    @Param('offset') offset: number,
+    @Param('limit') limit: number,
+    @Request() req: any,
+    @Query('title') title: string,
+    @Query('type') type: string,
+  ): Promise<object> {
+    try {
+      if (req.user.role != 1) throw { forbidden: true };
+
+      const response = await this.contentService.listContent(
+        offset,
+        limit,
+        title,
+        type,
+      );
       return response;
     } catch (error) {
       if (error.forbidden)
