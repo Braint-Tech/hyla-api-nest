@@ -29,6 +29,9 @@ export class Content {
   @Column({ nullable: true })
   picture: string;
 
+  @Column({ nullable: true })
+  image: string;
+
   @ManyToOne(() => User, (user) => user.id, {
     nullable: true,
     onDelete: 'CASCADE',

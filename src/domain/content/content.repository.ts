@@ -13,4 +13,11 @@ export class ContentRepository extends Repository<Content> {
     content.user = user;
     return await this.save(content);
   }
+
+  async findContent(idContent: number): Promise<Content> {
+    return await this.findOne({
+      select: ['title', 'link', 'type', 'image', 'date'],
+      where: { id: idContent },
+    });
+  }
 }

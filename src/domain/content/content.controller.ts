@@ -6,6 +6,8 @@ import {
   Request,
   UseGuards,
   Body,
+  Get,
+  Param,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { ContentDto } from './content.dto';
@@ -39,6 +41,25 @@ export class ContentController {
           'Maximum amount of product content has already been reached!',
           HttpStatus.NOT_ACCEPTABLE,
         );
+      else throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('/:idContent')
+  async findContent(
+    @Param('idContent') idContent: number,
+    @Request() req: any,
+  ): Promise<object> {
+    try {
+      if (req.user.role != 1) throw { forbidden: true };
+
+      const response = await this.contentService.findContent(idContent);
+
+      return response;
+    } catch (error) {
+      if (error.forbidden)
+        throw new HttpException('Unauthorized user!', HttpStatus.FORBIDDEN);
       else throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }

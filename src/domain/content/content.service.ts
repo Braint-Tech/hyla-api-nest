@@ -17,4 +17,8 @@ export class ContentService {
     }
     return await this.contentRepository.createContent(contentDto);
   }
+
+  async findContent(idContent: number): Promise<object> {
+    return await this.contentRepository.findContent(idContent);
+  }
 }
