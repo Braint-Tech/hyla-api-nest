@@ -81,4 +81,12 @@ export class ContentRepository extends Repository<Content> {
 
     return result.raw;
   }
+
+  async findProductContent(): Promise<Content[]> {
+    return await this.find({
+      select: ['id', 'title', 'link'],
+      where: { type: '1' },
+      take: 5,
+    });
+  }
 }

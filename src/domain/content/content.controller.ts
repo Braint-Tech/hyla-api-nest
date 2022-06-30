@@ -125,4 +125,16 @@ export class ContentController {
       throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('/product/find')
+  async findProductContent(): Promise<object> {
+    try {
+      const response = await this.contentService.findProductContent();
+
+      return response;
+    } catch (error) {
+      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
 }

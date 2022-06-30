@@ -38,4 +38,8 @@ export class ContentService {
   async deleteContent(idContent: number): Promise<any> {
     return await this.contentRepository.deleteContent(idContent);
   }
+
+  async findProductContent(): Promise<object> {
+    return await this.contentRepository.findProductContent();
+  }
 }
