@@ -46,4 +46,8 @@ export class ContentService {
   async listBlogContent(offset: number, limit: number): Promise<any> {
     return await this.contentRepository.listBlogContent(offset, limit);
   }
+
+  async listVideoContent(offset: number, limit: number): Promise<any> {
+    return await this.contentRepository.listVideoContent(offset, limit);
+  }
 }

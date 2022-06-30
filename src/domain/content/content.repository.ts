@@ -106,4 +106,21 @@ export class ContentRepository extends Repository<Content> {
 
     return [list, { totalBlogContent: count }];
   }
+
+  async listVideoContent(offset: number, limit: number): Promise<object[]> {
+    const [list, count] = await Promise.all([
+      this.createQueryBuilder()
+        .distinct()
+        .select(['id', 'title', 'link', 'image'])
+        .where({ type: '2' })
+        .offset(offset)
+        .limit(limit)
+        .getRawMany(),
+      this.count({
+        where: { type: '2' },
+      }),
+    ]);
+
+    return [list, { totalVideoContent: count }];
+  }
 }

@@ -151,4 +151,21 @@ export class ContentController {
       throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('/list/video/:offset/:limit')
+  async listVideoContent(
+    @Param('offset') offset: number,
+    @Param('limit') limit: number,
+  ): Promise<object> {
+    try {
+      const response = await this.contentService.listVideoContent(
+        offset,
+        limit,
+      );
+      return response;
+    } catch (error) {
+      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
 }
