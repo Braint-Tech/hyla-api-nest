@@ -6,6 +6,7 @@ export class ContentDto {
   type?: string;
   date?: string;
   picture?: string;
+  image?: string;
   createdAt?: Date;
   updatedAt?: Date;
 }

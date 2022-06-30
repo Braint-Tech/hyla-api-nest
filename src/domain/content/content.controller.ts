@@ -9,6 +9,7 @@ import {
   Get,
   Param,
   Query,
+  Put,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { ContentDto } from './content.dto';
@@ -88,6 +89,26 @@ export class ContentController {
       if (error.forbidden)
         throw new HttpException('Unauthorized user!', HttpStatus.FORBIDDEN);
       else throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Put('/update/:idContent')
+  async updateContent(
+    @Param('idContent') idContent: number,
+    @Body() contentDto: ContentDto,
+    @Request() req: any,
+  ): Promise<object> {
+    try {
+      if (req.user.role != 1) throw { forbidden: true };
+
+      await this.contentService.updateContent(contentDto, idContent);
+
+      return {
+        message: 'Content successfully updated!',
+      };
+    } catch (error) {
+      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 }

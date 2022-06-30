@@ -30,4 +30,8 @@ export class ContentService {
   ): Promise<any> {
     return await this.contentRepository.listContent(offset, limit, title, type);
   }
+
+  async updateContent(contentDto: ContentDto, idContent: number): Promise<any> {
+    return await this.contentRepository.updateContent(contentDto, idContent);
+  }
 }

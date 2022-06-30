@@ -51,4 +51,23 @@ export class ContentRepository extends Repository<Content> {
     else if (title === undefined && type !== undefined) return { type: type };
     else return {};
   }
+
+  async updateContent(
+    contentDto: ContentDto,
+    idContent: number,
+  ): Promise<Content> {
+    const result = await this.createQueryBuilder()
+      .update({
+        title: contentDto.title,
+        link: contentDto.link,
+        image: contentDto.image,
+        date: contentDto.date,
+      })
+      .where({
+        id: idContent,
+      })
+      .execute();
+
+    return result.raw[0];
+  }
 }
